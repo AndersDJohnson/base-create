@@ -14,7 +14,7 @@ const runCommand = (command) => {
 }
 
 const create = (name, options) => {
-  const { dependencies, devDependencies } = options;
+  const { dependencies, devDependencies, package } = options;
   
   const appDir = process.argv[2];
 
@@ -152,6 +152,23 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 `)
+
+  const cwd = process.cwd()
+
+  const pkg = require(`${cwd}/package.json`)
+
+  pkg.scripts = {
+    ...pkg.scripts,
+    ...package.scripts
+  }
+
+  Object.entries(package, ([key, value]) => {
+    pkg[key] = value;
+  })
+
+  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+
+  return { name: appDir };
 }
 
 exports.default = create;
