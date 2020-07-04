@@ -162,9 +162,11 @@ dist
     ...package.scripts
   }
 
-  Object.entries(package, ([key, value]) => {
-    pkg[key] = value;
-  })
+  if (package) {
+    Object.entries(package).forEach(([key, value]) => {
+      pkg[key] = value;
+    })
+  }
 
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 
