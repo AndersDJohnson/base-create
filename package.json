@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "AndersDJohnson/base-create",
+  "funding": "https://github.com/sponsors/AndersDJohnson",
   "keywords": [],
   "author": "Anders D. Johnson",
   "license": "ISC"
