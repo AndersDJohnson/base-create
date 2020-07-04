@@ -28,8 +28,14 @@ const create = (name, options) => {
   process.chdir(appDir)
 
   runCommand('npm init -y')
-  runCommand('npm add -D ' + devDependencies.join(' '))
-  runCommand('npm add ' + dependencies.join(' '))
+
+  if (devDependencies) {
+    runCommand('npm add -D ' + devDependencies.join(' '))
+  }
+
+  if (dependencies) {
+    runCommand('npm add ' + dependencies.join(' '))
+  }
 
   fs.writeFileSync('.gitignore', `
 # Created by https://www.toptal.com/developers/gitignore/api/node
