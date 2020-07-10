@@ -26,6 +26,13 @@ const { name } = create('custom-babel', {
       "build:watch": "npm run build -- --watch",
     },
   },
+  files: [
+    'src/index.js',
+    {
+      path: 'src/hello.js',
+      contents: 'alert("hi")'
+    }
+  ]
 })
 
 // now you can create folders & files with `fs.mkdirSync` & `fs.writeFileSync`, etc.

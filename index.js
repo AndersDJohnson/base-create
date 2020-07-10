@@ -1,5 +1,7 @@
+const path = require('path')
 const fs = require('fs')
-const { spawnSync } = require('child_process')
+const { spawnSync } = require('child_process');
+const mkdirp = require('mkdirp');
 
 const runCommand = (command) => {
   console.log(command)
@@ -7,15 +9,15 @@ const runCommand = (command) => {
   const split = command.split(' ');
 
   const name = split.shift();
-  
+
   spawnSync(name, split, {
     stdio: 'inherit'
   })
 }
 
 const create = (name, options) => {
-  const { dependencies, devDependencies, package } = options;
-  
+  const { dependencies, devDependencies, package, files } = options;
+
   const appDir = process.argv[2];
 
   if (!appDir) {
@@ -169,6 +171,18 @@ dist
   }
 
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
+
+  if (files) {
+    files.forEach(file => {
+      // Following `vinyl` file schema.
+      const filepath = typeof file === 'string' ? file : file.path;
+      const contents = typeof file === 'string' ? '' : (
+        typeof file.contents === 'string' ? file.contents : JSON.stringify(file.contents, undefined, 2)
+      );
+      mkdirp.sync(path.dirname(filepath));
+      fs.writeFileSync(filepath, contents)
+    })
+  }
 
   return { name: appDir };
 }
