@@ -11,7 +11,10 @@
   "keywords": [],
   "author": "Anders D. Johnson",
   "license": "ISC",
-  "files": ["index.js"],
+  "files": [
+    "index.js",
+    "files/**"
+  ],
   "dependencies": {
     "mkdirp": "^1.0.4"
   }
