@@ -107,7 +107,7 @@ const createPackage = (name, options) => {
     fs.readFileSync(`${__dirname}/files/gitignore`)
   );
 
-  const newPackage = require(`${cwd}/${appDir}/package.json`);
+  const newPackage = require(`${appCwd}/package.json`);
 
   newPackage.scripts = {
     ...newPackage.scripts,
