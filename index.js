@@ -18,6 +18,23 @@ const runCommand = (command) => {
 const addScopeToPackageName = (scope, packageName) =>
   `@${scope.replace(/^@/, "")}/${packageName}`;
 
+const createFiles = (files) => {
+  if (!files) return;
+
+  files.forEach((file) => {
+    // Following `vinyl` file schema.
+    const filepath = typeof file === "string" ? file : file.path;
+    const contents =
+      typeof file === "string"
+        ? ""
+        : typeof file.contents === "string"
+        ? file.contents
+        : JSON.stringify(file.contents, undefined, 2);
+    mkdirp.sync(path.dirname(filepath));
+    fs.writeFileSync(filepath, contents);
+  });
+};
+
 const createPackage = (name, options) => {
   const {
     config = {},
@@ -27,6 +44,7 @@ const createPackage = (name, options) => {
     dependencies,
     devDependencies,
     package,
+    packages,
     files,
   } = options;
 
@@ -47,23 +65,28 @@ const createPackage = (name, options) => {
     appDir = `${appDir}/packages/${name}`;
   }
 
+  const appCwd = path.join(cwd, appDir);
+
   mkdirp.sync(appDir);
 
   process.chdir(appDir);
 
   // Create files first so they can start working even while commands are still running.
-  if (files) {
-    files.forEach((file) => {
-      // Following `vinyl` file schema.
-      const filepath = typeof file === "string" ? file : file.path;
-      const contents =
-        typeof file === "string"
-          ? ""
-          : typeof file.contents === "string"
-          ? file.contents
-          : JSON.stringify(file.contents, undefined, 2);
-      mkdirp.sync(path.dirname(filepath));
-      fs.writeFileSync(filepath, contents);
+  if (!isSubPackage) {
+    createFiles(files);
+  }
+
+  if (packages) {
+    packages.forEach((package) => {
+      const packageDir = `packages/${package.name}`;
+
+      mkdirp.sync(packageDir);
+
+      process.chdir(packageDir);
+
+      createFiles(package.files);
+
+      process.chdir(appCwd);
     });
   }
 
