@@ -2,6 +2,8 @@
 
 > Utility for npm init create-\* scripts.
 
+Note: If you're creating an initializer for monorepos, try [`base-create-monorepo`](https://npm.im/base-create-monorepo).
+
 Example for a script called `create-custom-babel`
 (run with `npm init custom-babel my-app`), you could do:
 
@@ -16,10 +18,10 @@ const { name } = create("custom-babel", {
   dependencies: ["@babel/runtime"],
   // optional dev deps to install
   devDependencies: ["@babel/core", "@babel/plugin-transform-runtime", A],
-  // Mostly a shallow merge into a base `package.json` from `npm init`.
+  // mostly a shallow merge into a base `package.json` from `npm init`
   package: {
     main: "dist/main.js",
-    // These will merge with scripts like `test` from `npm init`.
+    // these will merge with scripts like `test` from `npm init`
     scripts: {
       build: "babel src --out-dir dist",
       "build:watch": "npm run build -- --watch",
@@ -40,7 +42,7 @@ const { name } = create("custom-babel", {
     // optional package scope to for main package and any sub-packages for monorepos
     scope: "@my-org",
   },
-  // optionally specify sub-packages for monorepos
+  // optionally specify sub-packages for monorepos - see the `base-create-monorepo` package to ease this
   packages: [
     {
       name: "my-first-subpackage",
@@ -50,7 +52,7 @@ const { name } = create("custom-babel", {
         },
         files: ["src/first.js"],
       },
-      // ...supports most of the root-level options.
+      // ...supports most of the root-level options
     },
     {
       name: "my-second-subpackage",
@@ -60,11 +62,9 @@ const { name } = create("custom-babel", {
         },
         files: ["src/second.js"],
       },
-      // ...supports most of the root-level options.
+      // ...supports most of the root-level options
     },
-    // ...and more sub-packages if you want.
+    // ...and more sub-packages if you want
   ],
 });
-
-// now you can create folders & files with `fs.mkdirSync` & `fs.writeFileSync`, etc.
 ```
