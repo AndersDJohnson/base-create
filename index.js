@@ -90,9 +90,26 @@ const createFiles = (files, { options, params }) => {
   files.forEach((file) => createFile(file, params));
 };
 
+const makeCreateFileParams = (options) => {
+  const { scope, name } = options;
+
+  const nameWithScope = scope ? addScopeToPackageName(scope, name) : name;
+
+  const nameWithoutScope = name.replace(/^@.*\//, "");
+
+  const dirName = nameWithoutScope;
+
+  const createFileParams = {
+    nameWithScope,
+    nameWithoutScope,
+    dirName,
+  };
+
+  return createFileParams;
+};
+
 const createPackage = (options) => {
   const {
-    scope,
     isSubPackage,
     skipInstall,
     commands,
@@ -108,19 +125,11 @@ const createPackage = (options) => {
   // Follow the `@types/scope__name` convention for replacing `/`.
   let packageDir = process.argv[2].replace(/\//g, "__");
 
-  const name = options.name || packageDir;
+  options.name = options.name || packageDir;
 
-  const nameWithScope = scope ? addScopeToPackageName(scope, name) : name;
+  const createFileParams = makeCreateFileParams(options);
 
-  const nameWithoutScope = name.replace(/^@.*\//, "");
-
-  const dirName = nameWithoutScope;
-
-  const createFileParams = {
-    nameWithScope,
-    nameWithoutScope,
-    dirName,
-  };
+  const { nameWithScope, dirName } = createFileParams;
 
   if (!packageDir) {
     console.log(
@@ -168,7 +177,15 @@ const createPackage = (options) => {
 
       process.chdir(packageDir);
 
-      createFiles(package.files, { options, params: createFileParams });
+      const subPackage = {
+        ...package,
+        isSubPackage: true,
+      };
+
+      createFiles(package.files, {
+        options: subPackage,
+        params: makeCreateFileParams(subPackage),
+      });
 
       process.chdir(appCwd);
     });
