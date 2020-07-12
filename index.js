@@ -165,7 +165,7 @@ const createPackage = (name, options) => {
 
   process.chdir(cwd);
 
-  return { name: appDir };
+  return { name: appDir, appDir };
 };
 
 const create = (name, options) => {
@@ -185,7 +185,7 @@ const create = (name, options) => {
 
   console.log(
     chalk.green.bold(
-      `Done! You can now \`cd ${appDir}\` to start working on your project.`
+      `Done! You can now \`cd ${result.appDir}\` to start working on your project.`
     )
   );
 
