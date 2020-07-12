@@ -16,6 +16,7 @@
     "files/**"
   ],
   "dependencies": {
+    "chalk": "^4.1.0",
     "mkdirp": "^1.0.4"
   }
 }

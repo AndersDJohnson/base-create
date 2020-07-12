@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { spawnSync } = require("child_process");
 const mkdirp = require("mkdirp");
+const chalk = require("chalk");
 
 const runCommand = (command) => {
   console.log(command);
@@ -66,6 +67,15 @@ const createPackage = (name, options) => {
   }
 
   const appCwd = path.join(cwd, appDir);
+
+  if (fs.existsSync(appDir)) {
+    console.error(
+      chalk.red(
+        `Directory "${appDir}" already exists. Please only create projects in a new directory.`
+      )
+    );
+    process.exit(1);
+  }
 
   mkdirp.sync(appDir);
 
