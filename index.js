@@ -4,8 +4,15 @@ const { spawnSync } = require("child_process");
 const mkdirp = require("mkdirp");
 const chalk = require("chalk");
 
+const startCwd = process.cwd();
+
+const getRelativeCwd = () => path.relative(startCwd, process.cwd());
+
 const runCommand = (command) => {
-  console.log(command);
+  console.log(
+    chalk.green.bold(`Command (in "${getRelativeCwd()}"):`),
+    chalk.cyan(command)
+  );
 
   const split = command.split(" ");
 
@@ -19,21 +26,30 @@ const runCommand = (command) => {
 const addScopeToPackageName = (scope, packageName) =>
   `@${scope.replace(/^@/, "")}/${packageName}`;
 
+const createFile = (file) => {
+  // Following `vinyl` file schema.
+  const filepath = typeof file === "string" ? file : file.path;
+
+  console.log(
+    chalk.green.bold("Creating file:"),
+    chalk.cyan(path.join(getRelativeCwd(), filepath))
+  );
+
+  const contents =
+    typeof file === "string"
+      ? ""
+      : typeof file.contents === "string"
+      ? file.contents
+      : JSON.stringify(file.contents, undefined, 2);
+
+  mkdirp.sync(path.dirname(filepath));
+  fs.writeFileSync(filepath, contents);
+};
+
 const createFiles = (files) => {
   if (!files) return;
 
-  files.forEach((file) => {
-    // Following `vinyl` file schema.
-    const filepath = typeof file === "string" ? file : file.path;
-    const contents =
-      typeof file === "string"
-        ? ""
-        : typeof file.contents === "string"
-        ? file.contents
-        : JSON.stringify(file.contents, undefined, 2);
-    mkdirp.sync(path.dirname(filepath));
-    fs.writeFileSync(filepath, contents);
-  });
+  files.forEach(createFile);
 };
 
 const createPackage = (name, options) => {
@@ -77,6 +93,13 @@ const createPackage = (name, options) => {
     process.exit(1);
   }
 
+  console.log(
+    chalk.green.bold(
+      `Creating ${isSubPackage ? "sub-package" : "project"} directory:`
+    ),
+    chalk.cyan(path.join(getRelativeCwd(), appDir))
+  );
+
   mkdirp.sync(appDir);
 
   process.chdir(appDir);
@@ -112,10 +135,10 @@ const createPackage = (name, options) => {
     }
   }
 
-  fs.writeFileSync(
-    ".gitignore",
-    fs.readFileSync(`${__dirname}/files/gitignore`)
-  );
+  createFile({
+    path: ".gitignore",
+    contents: fs.readFileSync(`${__dirname}/files/gitignore`),
+  });
 
   const newPackage = require(`${appCwd}/package.json`);
 
@@ -134,7 +157,7 @@ const createPackage = (name, options) => {
     newPackage.name = addScopeToPackageName(scope, newPackage.name);
   }
 
-  fs.writeFileSync("package.json", JSON.stringify(newPackage, null, 2));
+  createFile({ path: "package.json", contents: newPackage });
 
   if (commands) {
     commands.forEach((command) => runCommand(command));
@@ -159,6 +182,12 @@ const create = (name, options) => {
       });
     });
   }
+
+  console.log(
+    chalk.green.bold(
+      `Done! You can now \`cd ${appDir}\` to start working on your project.`
+    )
+  );
 
   return result;
 };
