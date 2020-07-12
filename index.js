@@ -57,6 +57,8 @@ const createPackage = (options) => {
     config = {},
     isSubPackage,
     skipInstall,
+    skipGitignore,
+    skipReadme,
     commands,
     dependencies,
     devDependencies,
@@ -150,13 +152,25 @@ const createPackage = (options) => {
     }
   }
 
-  createFile(
-    {
-      path: ".gitignore",
-      contents: fs.readFileSync(`${__dirname}/files/gitignore`),
-    },
-    createFileParams
-  );
+  if (!skipGitignore) {
+    createFile(
+      {
+        path: ".gitignore",
+        contents: fs.readFileSync(`${__dirname}/files/gitignore`),
+      },
+      createFileParams
+    );
+  }
+
+  if (!skipReadme) {
+    createFile(
+      {
+        path: "README.md",
+        contents: `# ${nameWithScope}\n\n`,
+      },
+      createFileParams
+    );
+  }
 
   const newPackage = require(`${appCwd}/package.json`);
 

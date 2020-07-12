@@ -43,11 +43,15 @@ const { name } = create({
   ],
   // optional list of commands
   commands: [],
-  // optional config options
+  // optional global config options
   config: {
     // optional package scope to for main package and any sub-packages for monorepos
     scope: "@my-org",
   },
+  // optionally skip default gitignore creation
+  skipGitignore: false,
+  // optionally skip default readme creation
+  skipReadme: false,
   // optionally specify sub-packages for monorepos - see the `base-create-monorepo` package to ease this
   packages: [
     {
