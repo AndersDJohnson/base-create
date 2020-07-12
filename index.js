@@ -26,14 +26,9 @@ const runCommand = (command) => {
 const addScopeToPackageName = (scope, packageName) =>
   `@${scope.replace(/^@/, "")}/${packageName}`;
 
-const createFile = (file, params) => {
+const normalizeFile = (file) => {
   // Following `vinyl` file schema.
   const filepath = typeof file === "string" ? file : file.path;
-
-  console.log(
-    chalk.green.bold("Creating file:"),
-    chalk.cyan(path.join(getRelativeCwd(), filepath))
-  );
 
   let contents = typeof file === "string" ? "" : file.contents;
   contents = typeof contents === "function" ? contents(params) : contents;
@@ -42,12 +37,28 @@ const createFile = (file, params) => {
       ? contents
       : JSON.stringify(contents, undefined, 2);
 
+  return {
+    path: filepath,
+    contents,
+  };
+};
+
+const createFile = (file, params) => {
+  const { path: filepath, contents } = normalizeFile(file);
+
+  console.log(
+    chalk.green.bold("Creating file:"),
+    chalk.cyan(path.join(getRelativeCwd(), filepath))
+  );
+
   mkdirp.sync(path.dirname(filepath));
   fs.writeFileSync(filepath, contents);
 };
 
 const createFiles = (files, { options, params }) => {
   const { skipGitignore, skipReadme } = options;
+
+  const normalizedFiles = files && files.map(normalizeFile);
 
   if (!skipGitignore) {
     createFile(
@@ -59,7 +70,11 @@ const createFiles = (files, { options, params }) => {
     );
   }
 
-  if (!skipReadme) {
+  const hasReadmeFile =
+    normalizedFiles &&
+    normalizedFiles.find((file) => file.path === "README.md");
+
+  if (!hasReadmeFile && !skipReadme) {
     createFile(
       {
         path: "README.md",
