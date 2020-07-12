@@ -26,7 +26,7 @@ const runCommand = (command) => {
 const addScopeToPackageName = (scope, packageName) =>
   `@${scope.replace(/^@/, "")}/${packageName}`;
 
-const createFile = (file) => {
+const createFile = (file, params) => {
   // Following `vinyl` file schema.
   const filepath = typeof file === "string" ? file : file.path;
 
@@ -35,24 +35,24 @@ const createFile = (file) => {
     chalk.cyan(path.join(getRelativeCwd(), filepath))
   );
 
-  const contents =
-    typeof file === "string"
-      ? ""
-      : typeof file.contents === "string"
-      ? file.contents
-      : JSON.stringify(file.contents, undefined, 2);
+  let contents = typeof file === "string" ? "" : file.contents;
+  contents = typeof contents === "function" ? contents(params) : contents;
+  contents =
+    typeof contents === "string"
+      ? contents
+      : JSON.stringify(contents, undefined, 2);
 
   mkdirp.sync(path.dirname(filepath));
   fs.writeFileSync(filepath, contents);
 };
 
-const createFiles = (files) => {
+const createFiles = (files, params) => {
   if (!files) return;
 
-  files.forEach(createFile);
+  files.forEach((file) => createFile(file, params));
 };
 
-const createPackage = (name, options) => {
+const createPackage = (options) => {
   const {
     config = {},
     isSubPackage,
@@ -69,9 +69,24 @@ const createPackage = (name, options) => {
 
   const cwd = process.cwd();
 
-  let appDir = process.argv[2];
+  // Follow the `@types/scope__name` convention for replacing `/`.
+  let packageDir = process.argv[2].replace(/\//g, "__");
 
-  if (!appDir) {
+  const name = options.name || packageDir;
+
+  const nameWithScope = scope ? addScopeToPackageName(scope, name) : name;
+
+  const nameWithoutScope = name.replace(/^@.*\//, "");
+
+  const dirName = nameWithoutScope;
+
+  const createFileParams = {
+    nameWithScope,
+    nameWithoutScope,
+    dirName,
+  };
+
+  if (!packageDir) {
     console.log(
       "Must provide directory as argument: `npm init " + node + " my-app`."
     );
@@ -79,15 +94,15 @@ const createPackage = (name, options) => {
   }
 
   if (isSubPackage) {
-    appDir = `${appDir}/packages/${name}`;
+    packageDir = `${packageDir}/packages/${dirName}`;
   }
 
-  const appCwd = path.join(cwd, appDir);
+  const appCwd = path.join(cwd, packageDir);
 
-  if (!isSubPackage && fs.existsSync(appDir)) {
+  if (!isSubPackage && fs.existsSync(packageDir)) {
     console.error(
       chalk.red(
-        `Directory "${appDir}" already exists. Please only create projects in a new directory.`
+        `Directory "${packageDir}" already exists. Please only create projects in a new directory.`
       )
     );
     process.exit(1);
@@ -97,16 +112,16 @@ const createPackage = (name, options) => {
     chalk.green.bold(
       `Creating ${isSubPackage ? "sub-package" : "project"} directory:`
     ),
-    chalk.cyan(path.join(getRelativeCwd(), appDir))
+    chalk.cyan(path.join(getRelativeCwd(), packageDir))
   );
 
-  mkdirp.sync(appDir);
+  mkdirp.sync(packageDir);
 
-  process.chdir(appDir);
+  process.chdir(packageDir);
 
   // Create files first so they can start working even while commands are still running.
   if (!isSubPackage) {
-    createFiles(files);
+    createFiles(files, createFileParams);
   }
 
   if (packages) {
@@ -117,7 +132,7 @@ const createPackage = (name, options) => {
 
       process.chdir(packageDir);
 
-      createFiles(package.files);
+      createFiles(package.files, createFileParams);
 
       process.chdir(appCwd);
     });
@@ -135,10 +150,13 @@ const createPackage = (name, options) => {
     }
   }
 
-  createFile({
-    path: ".gitignore",
-    contents: fs.readFileSync(`${__dirname}/files/gitignore`),
-  });
+  createFile(
+    {
+      path: ".gitignore",
+      contents: fs.readFileSync(`${__dirname}/files/gitignore`),
+    },
+    createFileParams
+  );
 
   const newPackage = require(`${appCwd}/package.json`);
 
@@ -153,11 +171,9 @@ const createPackage = (name, options) => {
     });
   }
 
-  if (scope) {
-    newPackage.name = addScopeToPackageName(scope, newPackage.name);
-  }
+  newPackage.name = nameWithScope;
 
-  createFile({ path: "package.json", contents: newPackage });
+  createFile({ path: "package.json", contents: newPackage }, createFileParams);
 
   if (commands) {
     commands.forEach((command) => runCommand(command));
@@ -165,27 +181,27 @@ const createPackage = (name, options) => {
 
   process.chdir(cwd);
 
-  return { name: appDir, appDir };
+  return { name: packageDir, packageDir };
 };
 
-const create = (name, options) => {
+const create = (options) => {
   const { config, packages } = options;
 
-  const result = createPackage(name, options);
+  const result = createPackage(options);
 
   if (packages) {
     packages.forEach((package) => {
-      createPackage(package.name, {
+      createPackage({
+        ...package,
         isSubPackage: true,
         config,
-        ...package,
       });
     });
   }
 
   console.log(
     chalk.green.bold(
-      `Done! You can now \`cd ${result.appDir}\` to start working on your project.`
+      `Done! You can now \`cd ${result.packageDir}\` to start working on your project.`
     )
   );
 
