@@ -44,7 +44,7 @@ const normalizeFile = (file, params) => {
 };
 
 const createFile = (file, params) => {
-  const { path: filepath, contents } = normalizeFile(file);
+  const { path: filepath, contents } = normalizeFile(file, params);
 
   console.log(
     chalk.green.bold("Creating file:"),
