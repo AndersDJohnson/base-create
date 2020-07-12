@@ -76,7 +76,7 @@ const createFiles = (files, { options, params }) => {
 
 const createPackage = (options) => {
   const {
-    config = {},
+    scope,
     isSubPackage,
     skipInstall,
     commands,
@@ -86,8 +86,6 @@ const createPackage = (options) => {
     packages,
     files,
   } = options;
-
-  const { scope } = config;
 
   const cwd = process.cwd();
 
@@ -199,7 +197,7 @@ const createPackage = (options) => {
 };
 
 const create = (options) => {
-  const { config, packages } = options;
+  const { packages } = options;
 
   const result = createPackage(options);
 
@@ -208,7 +206,6 @@ const create = (options) => {
       createPackage({
         ...package,
         isSubPackage: true,
-        config,
       });
     });
   }
