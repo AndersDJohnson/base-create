@@ -46,7 +46,29 @@ const createFile = (file, params) => {
   fs.writeFileSync(filepath, contents);
 };
 
-const createFiles = (files, params) => {
+const createFiles = (files, { options, params }) => {
+  const { skipGitignore, skipReadme } = options;
+
+  if (!skipGitignore) {
+    createFile(
+      {
+        path: ".gitignore",
+        contents: fs.readFileSync(`${__dirname}/files/gitignore`),
+      },
+      params
+    );
+  }
+
+  if (!skipReadme) {
+    createFile(
+      {
+        path: "README.md",
+        contents: `# ${params.nameWithScope}\n\n`,
+      },
+      params
+    );
+  }
+
   if (!files) return;
 
   files.forEach((file) => createFile(file, params));
@@ -57,8 +79,6 @@ const createPackage = (options) => {
     config = {},
     isSubPackage,
     skipInstall,
-    skipGitignore,
-    skipReadme,
     commands,
     dependencies,
     devDependencies,
@@ -123,7 +143,7 @@ const createPackage = (options) => {
 
   // Create files first so they can start working even while commands are still running.
   if (!isSubPackage) {
-    createFiles(files, createFileParams);
+    createFiles(files, { options, params: createFileParams });
   }
 
   if (packages) {
@@ -134,7 +154,7 @@ const createPackage = (options) => {
 
       process.chdir(packageDir);
 
-      createFiles(package.files, createFileParams);
+      createFiles(package.files, { options, params: createFileParams });
 
       process.chdir(appCwd);
     });
@@ -150,26 +170,6 @@ const createPackage = (options) => {
     if (dependencies) {
       runCommand("npm add " + dependencies.join(" "));
     }
-  }
-
-  if (!skipGitignore) {
-    createFile(
-      {
-        path: ".gitignore",
-        contents: fs.readFileSync(`${__dirname}/files/gitignore`),
-      },
-      createFileParams
-    );
-  }
-
-  if (!skipReadme) {
-    createFile(
-      {
-        path: "README.md",
-        contents: `# ${nameWithScope}\n\n`,
-      },
-      createFileParams
-    );
   }
 
   const newPackage = require(`${appCwd}/package.json`);
