@@ -26,7 +26,7 @@ const runCommand = (command) => {
 const addScopeToPackageName = (scope, packageName) =>
   `@${scope.replace(/^@/, "")}/${packageName}`;
 
-const normalizeFile = (file) => {
+const normalizeFile = (file, params) => {
   // Following `vinyl` file schema.
   const filepath = typeof file === "string" ? file : file.path;
 
@@ -58,7 +58,8 @@ const createFile = (file, params) => {
 const createFiles = (files, { options, params }) => {
   const { skipGitignore, skipReadme } = options;
 
-  const normalizedFiles = files && files.map(normalizeFile);
+  const normalizedFiles =
+    files && files.map((file) => normalizeFile(file, params));
 
   if (!skipGitignore) {
     createFile(
