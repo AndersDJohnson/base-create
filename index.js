@@ -82,7 +82,7 @@ const createPackage = (options) => {
     commands,
     dependencies,
     devDependencies,
-    package,
+    package = {},
     packages,
     files,
   } = options;
