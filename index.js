@@ -52,7 +52,7 @@ const createFile = (file, params) => {
   );
 
   mkdirp.sync(path.dirname(filepath));
-  fs.writeFileSync(filepath, contents);
+  fs.writeFileSync(filepath, contents, "utf8");
 };
 
 const createFiles = (files, { options, params }) => {
@@ -65,7 +65,7 @@ const createFiles = (files, { options, params }) => {
     createFile(
       {
         path: ".gitignore",
-        contents: fs.readFileSync(`${__dirname}/files/gitignore`),
+        contents: fs.readFileSync(`${__dirname}/files/gitignore`, "utf8"),
       },
       params
     );
