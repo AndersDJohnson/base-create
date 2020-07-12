@@ -68,7 +68,7 @@ const createPackage = (name, options) => {
 
   const appCwd = path.join(cwd, appDir);
 
-  if (fs.existsSync(appDir)) {
+  if (!isSubPackage && fs.existsSync(appDir)) {
     console.error(
       chalk.red(
         `Directory "${appDir}" already exists. Please only create projects in a new directory.`
