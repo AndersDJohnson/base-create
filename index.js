@@ -138,7 +138,7 @@ const createPackage = (name, options) => {
 const create = (name, options) => {
   const { config, packages } = options;
 
-  createPackage(name, options);
+  const result = createPackage(name, options);
 
   if (packages) {
     packages.forEach((package) => {
@@ -149,6 +149,8 @@ const create = (name, options) => {
       });
     });
   }
+
+  return result;
 };
 
 exports.default = create;
