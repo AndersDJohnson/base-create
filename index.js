@@ -160,16 +160,6 @@ const createPackage = (options) => {
 
   runCommand("npm init -y");
 
-  if (!skipInstall) {
-    if (devDependencies) {
-      runCommand("npm add -D " + devDependencies.join(" "));
-    }
-
-    if (dependencies) {
-      runCommand("npm add " + dependencies.join(" "));
-    }
-  }
-
   const newPackage = require(`${appCwd}/package.json`);
 
   newPackage.scripts = {
@@ -186,6 +176,16 @@ const createPackage = (options) => {
   newPackage.name = nameWithScope;
 
   createFile({ path: "package.json", contents: newPackage }, createFileParams);
+
+  if (!skipInstall) {
+    if (devDependencies) {
+      runCommand("npm add -D " + devDependencies.join(" "));
+    }
+
+    if (dependencies) {
+      runCommand("npm add " + dependencies.join(" "));
+    }
+  }
 
   if (commands) {
     commands.forEach((command) => runCommand(command));
