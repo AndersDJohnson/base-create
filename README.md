@@ -13,7 +13,7 @@ Example for a script called `create-custom-babel`
 const create = require("base-create");
 
 // `name` will be the app name passed on CLI like "my-app"
-const { name } = create("custom-babel", {
+const { name } = create({
   // optional deps to install
   dependencies: ["@babel/runtime"],
   // optional dev deps to install
@@ -33,6 +33,12 @@ const { name } = create("custom-babel", {
     {
       path: "src/hello.js",
       contents: 'alert("hi")',
+    },
+    {
+      path: "README.md",
+      // `contents` can be a function
+      contents: ({ nameWithScope, nameWithoutScope, dirName }) =>
+        "# ${nameWithScope}",
     },
   ],
   // optional list of commands
