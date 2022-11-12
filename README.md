@@ -17,7 +17,7 @@ const { name } = create({
   // optional deps to install
   dependencies: ["@babel/runtime"],
   // optional dev deps to install
-  devDependencies: ["@babel/core", "@babel/plugin-transform-runtime", A],
+  devDependencies: ["@babel/core", "@babel/plugin-transform-runtime"],
   // mostly a shallow merge into a base `package.json` from `npm init`
   package: {
     main: "dist/main.js",
@@ -41,7 +41,7 @@ const { name } = create({
         "# ${nameWithScope}",
     },
   ],
-  // optional list of commands
+  // optional list of shell commands to be run
   commands: [],
   // optional global config options
   config: {
