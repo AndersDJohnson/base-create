@@ -122,21 +122,23 @@ const createPackage = (options) => {
 
   const cwd = process.cwd();
 
+  let packageDir = process.argv[2];
+
+  if (!packageDir) {
+    console.error(
+      chalk.red("Must provide directory as an argument.")
+    );
+    process.exit(1);
+  }
+  
   // Follow the `@types/scope__name` convention for replacing `/`.
-  let packageDir = process.argv[2].replace(/\//g, "__");
+  packageDir = process.argv[2].replace(/\//g, "__");
 
   options.name = options.name || packageDir;
 
   const createFileParams = makeCreateFileParams(options);
 
   const { nameWithScope, dirName } = createFileParams;
-
-  if (!packageDir) {
-    console.log(
-      "Must provide directory as argument: `npm init " + node + " my-app`."
-    );
-    process.exit(1);
-  }
 
   if (isSubPackage) {
     packageDir = `${packageDir}/packages/${dirName}`;
