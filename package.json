@@ -17,6 +17,6 @@
   ],
   "dependencies": {
     "chalk": "^4.1.0",
-    "mkdirp": "^1.0.4"
+    "mkdirp": "^3.0.1"
   }
 }
